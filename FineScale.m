@@ -9,6 +9,31 @@ pcolor(wvt.x,wvt.y,wvt.zeta_z(:,:,end).'/wvt.f), shading flat
 uz = wvt.diffZF(wvt.u);
 vz = wvt.diffZF(wvt.v);
 
+S2 = uz.*uz + vz.*vz;
+
+Egm = 6.3e-5;
+j_star = 3;
+b = 1300;
+k_crit = 0.6;
+N0 = 3*2*pi/3600;
+S2_gm = (3*pi/2)*j_star*Egm*b*k_crit*N0*N0;
+
+wkbScale = N0*N0./wvt.N2Function(wvt.z);
+
+epsilon_0 = 6.7e-10; % W/kg
+
+epsilon_iw = epsilon_0*shiftdim(wkbScale,-2) .* (S2/S2_gm).^2;
+
+%
+
+tke_diss = squeeze(epsilon_iw(:,50,:));
+
+figure
+pcolor(wvt.x/1e3,wvt.z,log10(tke_diss).'), shading flat
+cb = colorbar("eastoutside");
+clim([-11 -6])
+
+%%
 Uz_quad = squeeze(uz(1,1,:));
 Vz_quad = squeeze(vz(1,1,:));
 
