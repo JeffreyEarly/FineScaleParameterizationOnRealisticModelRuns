@@ -42,7 +42,7 @@ resolution(i).L = 10e3;
 
 transform = 'hydrostatic';
 
-resolution(2:end) = [];
+% resolution(2:end) = [];
 
 wvtArray = cell(length(resolution),1);
 for iRes = 1:length(resolution)
