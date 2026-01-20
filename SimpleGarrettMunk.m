@@ -10,16 +10,17 @@ N0 = 3*2*pi/3600;
 L_gm = 1300;
 N2 = @(z) N0*N0*exp(2*z/L_gm);
 Lz = 4000;
-L = 50e3;
-Nxy = 256;
-Nz = WVStratification.verticalResolutionForHorizontalResolution(L,Lz,Nxy,N2=N2,latitude=27);
+L = 500e3;
+Nxy = 512;
+% Nz = WVStratification.verticalResolutionForHorizontalResolution(L,Lz,Nxy,N2=N2,latitude=27);
+Nz = 700;
 
-% transform = 'hydrostatic';
-transform = 'boussinesq';
+transform = 'hydrostatic';
+% transform = 'boussinesq';
 
-emptyFilename = "empty-"+transform+"-" + string(Nxy) + "-" + string(Nz) + ".nc";
-filename = "cyprus-eddy-"+transform+"-" + string(Nxy) + "-" + string(Nz) + ".nc";
-if strcmp(transform,'boussinesq') &&  exist(emptyFilename,'file')
+emptyFilename = "empty-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + ".nc";
+filename = "fine-scale-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + ".nc";
+if exist(emptyFilename,'file')
     wvt = WVTransform.waveVortexTransformFromFile(emptyFilename);
 else
     if strcmp(transform,'boussinesq')
@@ -39,7 +40,7 @@ end
 
 wvt.removeAll;
 
-GMAmplitude = 0.5;
+GMAmplitude = 1.0;
 j_star = 3;
 L_gm = 1.3e3; % thermocline exponential scale, meters
 invT_gm = 5.2e-3; % reference buoyancy frequency, radians/seconds
@@ -61,7 +62,7 @@ H = @(j) H_norm*((j.^2+j_star.^2).^(-j_slope));
 B = @(omega) B_norm*wvt.f./(omega.*sqrt(omega.*omega-wvt.f*wvt.f));
 GM = @(omega,j) E*H(j) .* B(omega);
 
-wvt.addWavesWithFrequencySpectrum(ApmSpectrum=GM);
+wvt.addWavesWithFrequencySpectrum(ApmSpectrum=GM,shouldOnlyRandomizeOrientations=true, shouldThrowErrorIfDensityViolation=false);
 
 
 %%
