@@ -10,15 +10,15 @@ N0 = 3*2*pi/3600;
 L_gm = 1300;
 N2 = @(z) N0*N0*exp(2*z/L_gm);
 Lz = 4000;
-L = 500e3;
-Nxy = 512;
-% Nz = WVStratification.verticalResolutionForHorizontalResolution(L,Lz,Nxy,N2=N2,latitude=27);
-% Nz = 700;
-Nz = 512;
 
+L = 50e3;
+Nxy = 256;
+latitude = 31;
 
 transform = 'hydrostatic';
 % transform = 'boussinesq';
+
+Nz = WVStratification.verticalResolutionForHorizontalResolution(L,Lz,Nxy,N2=N2,latitude=latitude);
 
 emptyFilename = "empty-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + ".nc";
 filename = "fine-scale-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + ".nc";
@@ -26,9 +26,9 @@ if exist(emptyFilename,'file')
     wvt = WVTransform.waveVortexTransformFromFile(emptyFilename);
 else
     if strcmp(transform,'boussinesq')
-        wvt = WVTransformBoussinesq([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=31);
+        wvt = WVTransformBoussinesq([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=latitude);
     elseif strcmp(transform,'hydrostatic')
-        wvt = WVTransformHydrostatic([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=31);
+        wvt = WVTransformHydrostatic([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=latitude);
     else
         error('unknown transform');
     end
@@ -70,6 +70,6 @@ wvt.addWavesWithFrequencySpectrum(ApmSpectrum=GM,shouldOnlyRandomizeOrientations
 %%
 model = WVModel(wvt);
 
-model.createNetCDFFileForModelOutput(filename,outputInterval=600,shouldOverwriteExisting=true);
+model.createNetCDFFileForModelOutput(filename,outputInterval=3600,shouldOverwriteExisting=true);
 
-model.integrateToTime(wvt.t + 1800);
+model.integrateToTime(wvt.t + 2*86400);
