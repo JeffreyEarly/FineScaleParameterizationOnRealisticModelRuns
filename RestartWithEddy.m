@@ -1,10 +1,12 @@
 
-restartFile = "fine-scale-hydrostatic-500km-512-512.nc";
-shouldAddInertialOscillations = false;
+% restartFile = "fine-scale-hydrostatic-500km-512-512.nc";
+restartFile = "fine-scale-hydrostatic-50km-256-443.nc";
+filename = "fine-scale-restart-with-eddy-hydrostatic-50km-256-443.nc";
+shouldAddInertialOscillations = true;
 shouldAddEddy = true;
 
 wvt = WVTransform.waveVortexTransformFromFile(restartFile,iTime=Inf);
-
+% wvt.removeAll;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -46,3 +48,6 @@ if shouldAddEddy
 end
 
 % N2 = wvt.N2 + squeeze( (N2(floor(wvt.Nx/2),floor(wvt.Ny/2),:)) );
+model = WVModel(wvt);
+model.createNetCDFFileForModelOutput(filename,outputInterval=3600,shouldOverwriteExisting=true);
+model.integrateToTime(wvt.t + 4*86400);
