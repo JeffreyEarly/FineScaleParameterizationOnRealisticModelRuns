@@ -12,7 +12,7 @@ N2 = @(z) N0*N0*exp(2*z/L_gm);
 Lz = 4000;
 
 L = 50e3;
-Nxy = 64;
+Nxy = 256;
 latitude = 31;
 
 transform = 'hydrostatic';

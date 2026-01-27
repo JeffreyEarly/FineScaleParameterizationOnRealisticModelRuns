@@ -1,15 +1,22 @@
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56.nc";
-filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-256-443.nc";
+% filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2.nc";
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56-one-half-dealias.nc";
+filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2.nc";
+% filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2-cyclone.nc";
 wvd = WVDiagnostics(filename);
 wvt = wvd.wvt;
 int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 
 %%
 wvd.plotEnergyOverTime(energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.io, EnergyReservoir.igw, EnergyReservoir.total]);
+title("medium-res cyclone")
+exportgraphics(gcf,"energy-medium-res-cyclone.pdf")
 
 %%
 wvd.plotEnergyFluxOverTime();
+title("medium-res cyclone")
+ylim([-1.0 0.5])
+exportgraphics(gcf,"energy-flux-medium-res-cyclone.pdf")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -17,7 +24,7 @@ wvd.plotEnergyFluxOverTime();
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-wvd.iTime = 201;
+wvd.iTime = 61;
 
 xIndices = floor(wvt.Nx/2);
 yIndices = 1:wvt.Ny;
@@ -33,6 +40,7 @@ tl = tiledlayout(2,1,TileSpacing="tight");
 
 tile = nexttile;
 eta = wvt.u_w;
+eta = wvt.u_w.^2 + wvt.v_w.^2 + shiftdim(wvt.N2,-2) .* wvt.eta_w.^2;
 rv = wvt.diffX(wvt.v_g) - wvt.diffY(wvt.u_g);
 
 p3 = pcolor(horzAxis,vertAxis,squeeze(eta(xIndices,yIndices,zIndices)).'); shading interp, hold on
@@ -75,6 +83,18 @@ title(tl,"day " + floor(wvt.t/86400))
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+uz = wvt.diffZF(wvt.u);
+vz = wvt.diffZF(wvt.v);
+S2 = uz.*uz + vz.*vz;
+Ri = shiftdim(wvt.N2,-2) ./ S2;
+Ri(isinf(Ri)) = nan;
+Ri(Ri>2) = nan;
+
+figure
+p3 = pcolor(horzAxis,vertAxis,squeeze(Ri(xIndices,yIndices,zIndices)).'); shading flat, hold on
+clim([0 2])
+colorbar("eastoutside");
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %% y-z slice of (u,v,eta) through the entire domain
@@ -102,6 +122,7 @@ for iT=0:(Nt-1)
 
     tile = nexttile(iT+1);
     eta = wvt.u_w;
+    eta = wvt.u_w.^2 + wvt.v_w.^2 + shiftdim(wvt.N2,-2) .* wvt.eta_w.^2;
     rv = wvt.diffX(wvt.v_g) - wvt.diffY(wvt.u_g);
 
     p3 = pcolor(horzAxis,vertAxis,squeeze(eta(xIndices,yIndices,zIndices)).'); shading interp, hold on
@@ -142,7 +163,7 @@ end
 
 tile = nexttile(iT+1);
 cb3 = colorbar('eastoutside');
-cb3.Label.String = 'u (m/s)';
+cb3.Label.String = 'wave energy (m^2/s^2)';
 
 tile = nexttile(iT + 1 + Nt);
 cb = colorbar("eastoutside");
