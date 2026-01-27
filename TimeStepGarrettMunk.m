@@ -12,27 +12,28 @@ N2 = @(z) N0*N0*exp(2*z/L_gm);
 Lz = 4000;
 
 L = 50e3;
-Nxy = 128;
+Nxy = 64;
 latitude = 31;
 
-% transform = 'hydrostatic';
-transform = 'boussinesq';
+transform = 'hydrostatic';
+% transform = 'boussinesq';
 
 Nz = WVStratification.verticalResolutionForHorizontalResolution(L,Lz,Nxy,N2=N2,latitude=latitude);
 
-emptyFilename = "empty-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + ".nc";
-filename = "fine-scale-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + ".nc";
+emptyFilename = "empty-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + "-one-half-dealias" + ".nc";
+filename = "fine-scale-"+transform+"-" + string(round(L)/1e3) + "km-" + string(Nxy) + "-" + string(Nz) + "-one-half-dealias" + ".nc";
 if exist(emptyFilename,'file')
     wvt = WVTransform.waveVortexTransformFromFile(emptyFilename);
 else
     if strcmp(transform,'boussinesq')
-        wvt = WVTransformBoussinesq([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=latitude);
+        wvt = WVTransformBoussinesq([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=latitude, Nj=floor((Nz-1)/2) );
     elseif strcmp(transform,'hydrostatic')
-        wvt = WVTransformHydrostatic([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=latitude);
+        wvt = WVTransformHydrostatic([L, L, Lz], [Nxy, Nxy, Nz], N2=N2,latitude=latitude, Nj=floor((Nz-1)/2) );
     else
         error('unknown transform');
     end
     wvt.addForcing(WVAdaptiveDamping(wvt));
+    wvt.addForcing(WVVerticalDamping(wvt,nu=1.2e-6, kappa=1e-6));
     wvt.writeToFile(emptyFilename,shouldOverwriteExisting=true);
 end
 

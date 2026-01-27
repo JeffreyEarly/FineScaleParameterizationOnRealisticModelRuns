@@ -1,0 +1,149 @@
+% filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56.nc";
+filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-256-443.nc";
+% filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56-one-half-dealias.nc";
+wvd = WVDiagnostics(filename);
+wvt = wvd.wvt;
+int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
+
+%%
+wvd.plotEnergyOverTime(energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.io, EnergyReservoir.igw, EnergyReservoir.total]);
+
+%%
+wvd.plotEnergyFluxOverTime();
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% y-z slice of (u,v,eta) through the entire domain
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+wvd.iTime = 201;
+
+xIndices = floor(wvt.Nx/2);
+yIndices = 1:wvt.Ny;
+zIndices = 1:wvt.Nz;
+horzAxis = wvt.y/1e3;
+vertAxis = wvt.z;
+
+fig1 = figure('Units', 'points', 'Position', [50 50 750 800]);
+set(gcf,'PaperPositionMode','auto')
+set(gcf, 'Color', 'w');
+
+tl = tiledlayout(2,1,TileSpacing="tight");
+
+tile = nexttile;
+eta = wvt.u_w;
+rv = wvt.diffX(wvt.v_g) - wvt.diffY(wvt.u_g);
+
+p3 = pcolor(horzAxis,vertAxis,squeeze(eta(xIndices,yIndices,zIndices)).'); shading interp, hold on
+
+contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
+contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+title(tile,'u of the wave field')
+cb3 = colorbar('eastoutside');
+% cb3.Label.String = 'cm';
+
+% Non-transport (non-negative) dissipation
+svv = wvt.forcingWithName("adaptive damping");
+Fp = sqrt(-wvt.uvMax * svv.damp) .* wvt. Ap;
+Fm = sqrt(-wvt.uvMax * svv.damp) .* wvt. Am;
+F0 = sqrt(-wvt.uvMax * svv.damp) .* wvt. A0;
+
+Fu = wvt.transformToSpatialDomainWithF(Apm=wvt.UAp.*wvt.phase.*(Fp) + wvt.UAm.*wvt.conjPhase.*(Fm),A0=wvt.UA0.*(F0));
+Fv = wvt.transformToSpatialDomainWithF(Apm=wvt.VAp.*wvt.phase.*(Fp) + wvt.VAm.*wvt.conjPhase.*(Fm),A0=wvt.VA0.*(F0));
+Feta = wvt.transformToSpatialDomainWithG(Apm=wvt.NAp.*wvt.phase.*(Fp) + wvt.NAm.*wvt.conjPhase.*(Fm),A0=wvt.NA0.*(F0));
+
+te_diss = Fu .* Fu + Fv .* Fv + shiftdim(wvt.N2,-2) .* Feta .* Feta;
+int_vol( te_diss )/wvd.flux_scale
+
+
+tile = nexttile;
+pcolor(wvt.x/1e3,wvt.z,log10(abs(squeeze(te_diss(xIndices,yIndices,zIndices)))).'), shading flat, hold on
+contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
+contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+
+cb = colorbar("eastoutside");
+% ylim([-2000 0])
+clim([-10 -8])
+title("energy dissipation from adaptive damping")
+
+title(tl,"day " + floor(wvt.t/86400))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% Mode spectrum
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% y-z slice of (u,v,eta) through the entire domain
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Nt = 6;
+dT = 10;
+
+
+
+xIndices = floor(wvt.Nx/2);
+yIndices = 1:wvt.Ny;
+zIndices = 1:wvt.Nz;
+horzAxis = wvt.y/1e3;
+vertAxis = wvt.z;
+
+fig1 = figure('Units', 'points', 'Position', [50 50 2000 800]);
+set(gcf,'PaperPositionMode','auto')
+set(gcf, 'Color', 'w');
+
+tl = tiledlayout(2,Nt,TileSpacing="tight");
+
+for iT=0:(Nt-1)
+    wvd.iTime = 4*(iT*dT)+1;
+
+    tile = nexttile(iT+1);
+    eta = wvt.u_w;
+    rv = wvt.diffX(wvt.v_g) - wvt.diffY(wvt.u_g);
+
+    p3 = pcolor(horzAxis,vertAxis,squeeze(eta(xIndices,yIndices,zIndices)).'); shading interp, hold on
+
+    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
+    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+    title(tile,"day " + floor(wvt.t/86400))
+    % title(tile,'u of the wave field')
+    % cb3 = colorbar('eastoutside');
+    % cb3.Label.String = 'cm';
+
+    % Non-transport (non-negative) dissipation
+    svv = wvt.forcingWithName("adaptive damping");
+    Fp = sqrt(-wvt.uvMax * svv.damp) .* wvt. Ap;
+    Fm = sqrt(-wvt.uvMax * svv.damp) .* wvt. Am;
+    F0 = sqrt(-wvt.uvMax * svv.damp) .* wvt. A0;
+
+    Fu = wvt.transformToSpatialDomainWithF(Apm=wvt.UAp.*wvt.phase.*(Fp) + wvt.UAm.*wvt.conjPhase.*(Fm),A0=wvt.UA0.*(F0));
+    Fv = wvt.transformToSpatialDomainWithF(Apm=wvt.VAp.*wvt.phase.*(Fp) + wvt.VAm.*wvt.conjPhase.*(Fm),A0=wvt.VA0.*(F0));
+    Feta = wvt.transformToSpatialDomainWithG(Apm=wvt.NAp.*wvt.phase.*(Fp) + wvt.NAm.*wvt.conjPhase.*(Fm),A0=wvt.NA0.*(F0));
+
+    te_diss = Fu .* Fu + Fv .* Fv + shiftdim(wvt.N2,-2) .* Feta .* Feta;
+    int_vol( te_diss )/wvd.flux_scale
+
+
+    tile = nexttile(iT + 1 + Nt);
+    pcolor(wvt.x/1e3,wvt.z,log10(abs(squeeze(te_diss(xIndices,yIndices,zIndices)))).'), shading flat, hold on
+    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
+    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+
+    % cb = colorbar("eastoutside");
+    % % ylim([-2000 0])
+    clim([-10 -8])
+    % title("energy dissipation from adaptive damping")
+
+    % title(tl,"day " + floor(wvt.t/86400))
+end
+
+tile = nexttile(iT+1);
+cb3 = colorbar('eastoutside');
+cb3.Label.String = 'u (m/s)';
+
+tile = nexttile(iT + 1 + Nt);
+cb = colorbar("eastoutside");
+cb.Label.String = 'energy dissipation log10(m^3/s^2)';

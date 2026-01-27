@@ -1,5 +1,9 @@
 filename = "hydrostatic_mean_flow_and_wave_forced_day3000.nc";
 filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-hydrostatic-50km-128-222.nc";
+filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-boussinesq-50km-256-443.nc";
+% filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-hydrostatic-50km-256-443.nc";
+filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-restart-with-eddy-no-igw-boussinesq-50km-256-443.nc";
+filename = "/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-256-443.nc";
 wvt = WVTransform.waveVortexTransformFromFile(filename,shouldReadOnly=true,iTime=Inf);
 wvt.addOperation(SpatialForcingOperation(wvt));
 int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
@@ -26,19 +30,17 @@ wkbScale = N0*N0./wvt.N2Function(wvt.z);
 epsilon_0 = 6.7e-10; % W/kg, J/s/kg = N m/s/kg = kg m^2 / s^3 / kg = m^2 / s^3
 
 epsilon_iw = epsilon_0*shiftdim(wkbScale,-2) .* (S2/S2_gm).^2;
-
+int_vol( epsilon_iw )
 %
 
-
-tke_diss = squeeze(epsilon_iw(:,50,:));
-
 figure
-pcolor(wvt.x/1e3,wvt.z,log10(tke_diss).'), shading flat
+pcolor(wvt.x/1e3,wvt.z,log10(squeeze(epsilon_iw(:,64,:))).'), shading flat
+ylim([-2000 0])
 cb = colorbar("eastoutside");
-clim([-10 -8])
+clim([-12 -10])
 
 %% Flux from adaptive damping (this is positive and negative)
-[Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName("adaptive damping");
+[Fu,Fv,Feta] = wvt.spatialFluxForForcingWithName("vertical scalar diffusivity");
 
 ke_diss = wvt.u .* Fu + wvt.v .* Fv;
 pe_diss = shiftdim(wvt.N2,-2) .* wvt.eta .* Feta;
@@ -46,6 +48,13 @@ pe_diss = shiftdim(wvt.N2,-2) .* wvt.eta .* Feta;
 te_diss = ke_diss + pe_diss; % + p_flux;
 int_vol( te_diss )
 
+%%
+name = "vertical scalar diffusivity";
+name = "adaptive damping";
+F = wvt.fluxForForcing();
+Fp = F{name}.Fp; Fm = F{name}.Fm; F0 = F{name}.F0; 
+[Ep,Em,E0] = wvt.energyFluxFromNonlinearFlux(Fp,Fm,F0);
+sum(Ep(:) + Em(:) + E0(:))
 
 
 %% Non-transport (non-negative) dissipation
@@ -63,18 +72,19 @@ pe_diss = shiftdim(wvt.N2,-2) .* Feta_r .* Feta_r;
 te_diss = ke_diss + pe_diss;
 int_vol( te_diss )
 
-%%
+
 figure
-pcolor(wvt.x/1e3,wvt.z,log10(abs(squeeze(te_diss(:,50,:)))).'), shading flat
+pcolor(wvt.x/1e3,wvt.z,log10(abs(squeeze(te_diss(:,64,:)))).'), shading flat
 cb = colorbar("eastoutside");
-clim([-10 -8])
+ylim([-2000 0])
+clim([-12 -10])
 
 %% Richardson number
 S2 = uz.*uz + vz.*vz;
 Ri = shiftdim(wvt.N2,-2) ./ S2;
 Ri0 = 1.0;
 
-a = squeeze(Ri(:,50,:));
+a = squeeze(Ri(:,64,:));
 a(a>Ri0) = nan;
 figure
 pcolor(wvt.x/1e3,wvt.z,a.'), shading flat
