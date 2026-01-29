@@ -3,9 +3,17 @@
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56-one-half-dealias.nc";
 filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2.nc";
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2-cyclone.nc";
+
+filename = "/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
 wvd = WVDiagnostics(filename);
 wvt = wvd.wvt;
 int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
+
+xIndices = floor(wvt.Nx/2);
+yIndices = 1:wvt.Ny;
+zIndices = 1:wvt.Nz;
+horzAxis = wvt.y/1e3;
+vertAxis = wvt.z;
 
 %%
 wvd.plotEnergyOverTime(energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.io, EnergyReservoir.igw, EnergyReservoir.total]);
@@ -25,12 +33,6 @@ exportgraphics(gcf,"energy-flux-medium-res-cyclone.pdf")
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 wvd.iTime = 61;
-
-xIndices = floor(wvt.Nx/2);
-yIndices = 1:wvt.Ny;
-zIndices = 1:wvt.Nz;
-horzAxis = wvt.y/1e3;
-vertAxis = wvt.z;
 
 fig1 = figure('Units', 'points', 'Position', [50 50 750 800]);
 set(gcf,'PaperPositionMode','auto')
@@ -79,20 +81,31 @@ title(tl,"day " + floor(wvt.t/86400))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%% Mode spectrum
+%% inverse Richardson number
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 uz = wvt.diffZF(wvt.u);
 vz = wvt.diffZF(wvt.v);
 S2 = uz.*uz + vz.*vz;
-Ri = shiftdim(wvt.N2,-2) ./ S2;
-Ri(isinf(Ri)) = nan;
-Ri(Ri>2) = nan;
+N2 = -(wvt.g/wvt.rho0)*wvt.diffZG(wvt.rho_e) + shiftdim(wvt.N2,-2);
+invRi = S2./N2;
+% invRi(invRi<0.1) = nan;
+
+[val,idx] = max(invRi(:));
+[i,j,k] = ind2sub(size(invRi),idx);
+
+xIndices = i;
+yIndices = 1:wvt.Ny;
+zIndices = 1:wvt.Nz;
+horzAxis = wvt.y/1e3;
+vertAxis = wvt.z;
 
 figure
-p3 = pcolor(horzAxis,vertAxis,squeeze(Ri(xIndices,yIndices,zIndices)).'); shading flat, hold on
-clim([0 2])
+p3 = pcolor(horzAxis,vertAxis,squeeze(invRi(xIndices,yIndices,zIndices)).'); shading flat, hold on
+clim([0 4])
 colorbar("eastoutside");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
