@@ -1,16 +1,25 @@
 
-% restartFile = "fine-scale-hydrostatic-500km-512-512.nc";
-restartFile = "fine-scale-hydrostatic-50km-128-222-one-half-dealias.nc";
-filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2-cyclone.nc";
+resolution = 64;
+eddysign = 1;
 
-% restartFile = "fine-scale-hydrostatic-50km-64-111-one-half-dealias.nc";
-% filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2-cyclone.nc";
+if eddysign == 1
+    eddyname = "cyclone";
+elseif eddysign == -1
+    eddyname = "anticyclone";
+end
 
-restartFile = "fine-scale-hydrostatic-50km-128-222-one-half-dealias.nc";
-filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2-cyclone.nc";
+if resolution == 64
+    restartFile = "fine-scale-hydrostatic-50km-64-111-one-half-dealias.nc";
+    filenamePrefix = "fine-scale-hydrostatic-50km-64-111-";
+elseif resolution == 128
+    restartFile = "fine-scale-hydrostatic-50km-128-222-one-half-dealias.nc";
+    filenamePrefix = "fine-scale-hydrostatic-50km-128-222-";
+elseif resolution == 256
+    restartFile = "fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
+    filenamePrefix = "fine-scale-hydrostatic-50km-128-222-";
+end
 
-restartFile = "fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
-filename = "fine-scale-restart-with-anticyclone-no-igw-hydrostatic-50km-256-443-one-half-dealias..nc";
+filename = filenamePrefix + eddyname + "-cyclogeostrophic.nc";
 
 shouldAddInertialOscillations = true;
 shouldAddEddy = true;
@@ -46,16 +55,23 @@ end
 
 if shouldAddEddy
     Le = wvt.Lx/8; % 7 is the minimum you'll want to go, 
-    He = wvt.Lz/10;
-    U = 0.25; % m/s
+    He = wvt.Lz/15;
+    U = eddysign*0.25; % m/s
     x0 = (max(wvt.x)-min(wvt.x))/2;
     y0 = (max(wvt.y)-min(wvt.y))/2;
 
-    H = @(z) exp(-(z/He/sqrt(2)).^2 );
+    H = @(z) exp(-(z/He).^2 );
     F = @(x,y) exp(-((x-x0)/Le).^2 -((y-y0)/Le).^2);
-    psi = @(x,y,z) U*(Le/sqrt(2))*exp(1/2)*H(z).*(F(x,y) - (pi*Le*Le/(wvt.Lx*wvt.Ly)));
-    wvt.setGeostrophicStreamfunction(psi);
+    A = U*(sqrt(2)/Le)*exp(1/2);
+
+    u = @(x,y,z) - A * (y - y0) .* F(x,y) .* H(z);
+    v = @(x,y,z)   A * (x - x0) .* F(x,y) .* H(z);
+    eta = @(x,y,z) - A * (Le*Le/He/He) * shiftdim(1 ./ wvt.N2,-2) .* z .* F(x,y) .* H(z) .* ( A*F(x,y) .* H(z) + wvt.f );
+
+    wvt.addUVEta(u(wvt.X,wvt.Y,wvt.Z),v(wvt.X,wvt.Y,wvt.Z),eta(wvt.X,wvt.Y,wvt.Z))
 end
+
+%%
 
 % N2 = wvt.N2 + squeeze( (N2(floor(wvt.Nx/2),floor(wvt.Ny/2),:)) );
 model = WVModel(wvt);

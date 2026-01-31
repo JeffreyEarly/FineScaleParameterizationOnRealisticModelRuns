@@ -1,4 +1,5 @@
-filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2.nc";
+% filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2.nc";
+filename = "fine-scale-restart-with-cyclone-no-igw-hydrostatic-50km-256-443-one-half-dealias.nc";
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2-cyclone.nc";
 [wvt,ncfile] = WVTransform.waveVortexTransformFromFile(filename,iTime=1);
 t = ncfile.readVariables('wave-vortex/t');
@@ -28,7 +29,7 @@ end
 figure
 tl = tiledlayout(2,1);
 % title(tl,"medium-res cyclone")
-title(tl,"medium-res anticyclone")
+title(tl,"high-res cyclone")
 
 nexttile
 pcolor(t/86400,wvt.z,E_wave.'), shading flat
@@ -44,4 +45,4 @@ clim([-10 -5])
 cb = colorbar("eastoutside");
 cb.Label.String = 'energy dissipation (m^2/s^3)';
 
-exportgraphics(gcf,"hovmuller-medium-res-anticyclone.png")
+exportgraphics(gcf,"hovmuller-high-res-cyclone.png")
