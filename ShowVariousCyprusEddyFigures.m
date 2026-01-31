@@ -5,6 +5,8 @@ filename = "fine-scale-restart-with-cyclone-no-igw-hydrostatic-50km-256-443-one-
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2-cyclone.nc";
 
 filename = "/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
+filename = "fine-scale-hydrostatic-50km-64-111-cyclone-cyclogeostrophic.nc";
+filename = "fine-scale-hydrostatic-50km-128-222-cyclone-cyclogeostrophic.nc";
 wvd = WVDiagnostics(filename);
 wvt = wvd.wvt;
 int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
@@ -17,12 +19,12 @@ vertAxis = wvt.z;
 
 %%
 wvd.plotEnergyOverTime(energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.io, EnergyReservoir.igw, EnergyReservoir.total]);
-title("high-res cyclone")
+title("high-res anticyclone")
 % exportgraphics(gcf,"energy-medium-res-cyclone.pdf")
 
 %%
 wvd.plotEnergyFluxOverTime();
-title("high-res cyclone")
+title("high-res anticyclone")
 ylim([-1.0 0.5])
 % exportgraphics(gcf,"energy-flux-medium-res-cyclone.pdf")
 
