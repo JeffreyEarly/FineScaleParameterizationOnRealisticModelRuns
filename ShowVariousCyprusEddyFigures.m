@@ -1,7 +1,7 @@
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56.nc";
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2.nc";
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-200km-128-56-one-half-dealias.nc";
-filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-128-222-one-half-dealias-take-2.nc";
+filename = "fine-scale-restart-with-cyclone-no-igw-hydrostatic-50km-256-443-one-half-dealias.nc";
 % filename = "fine-scale-restart-with-eddy-no-igw-hydrostatic-50km-64-111-one-half-dealias-take-2-cyclone.nc";
 
 filename = "/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
@@ -17,14 +17,14 @@ vertAxis = wvt.z;
 
 %%
 wvd.plotEnergyOverTime(energyReservoirs = [EnergyReservoir.geostrophic_mda, EnergyReservoir.io, EnergyReservoir.igw, EnergyReservoir.total]);
-title("medium-res cyclone")
-exportgraphics(gcf,"energy-medium-res-cyclone.pdf")
+title("high-res cyclone")
+% exportgraphics(gcf,"energy-medium-res-cyclone.pdf")
 
 %%
 wvd.plotEnergyFluxOverTime();
-title("medium-res cyclone")
+title("high-res cyclone")
 ylim([-1.0 0.5])
-exportgraphics(gcf,"energy-flux-medium-res-cyclone.pdf")
+% exportgraphics(gcf,"energy-flux-medium-res-cyclone.pdf")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -32,7 +32,7 @@ exportgraphics(gcf,"energy-flux-medium-res-cyclone.pdf")
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-wvd.iTime = 61;
+% wvd.iTime = 41;
 
 fig1 = figure('Units', 'points', 'Position', [50 50 750 800]);
 set(gcf,'PaperPositionMode','auto')
@@ -64,7 +64,7 @@ Fv = wvt.transformToSpatialDomainWithF(Apm=wvt.VAp.*wvt.phase.*(Fp) + wvt.VAm.*w
 Feta = wvt.transformToSpatialDomainWithG(Apm=wvt.NAp.*wvt.phase.*(Fp) + wvt.NAm.*wvt.conjPhase.*(Fm),A0=wvt.NA0.*(F0));
 
 te_diss = Fu .* Fu + Fv .* Fv + shiftdim(wvt.N2,-2) .* Feta .* Feta;
-int_vol( te_diss )/wvd.flux_scale
+% int_vol( te_diss )/wvd.flux_scale
 
 
 tile = nexttile;
