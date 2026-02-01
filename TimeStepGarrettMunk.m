@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%% Setup the model
+%% Initialize the model and save the empty file
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -37,8 +37,11 @@ else
     wvt.writeToFile(emptyFilename,shouldOverwriteExisting=true);
 end
 
-%%
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% Add a Garrett-Munk spectrum
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % wvt.initWithGMSpectrum();
 
 wvt.removeAll;
@@ -67,8 +70,11 @@ GM = @(omega,j) E*H(j) .* B(omega);
 
 wvt.addWavesWithFrequencySpectrum(ApmSpectrum=GM,shouldOnlyRandomizeOrientations=true, shouldThrowErrorIfDensityViolation=false);
 
-
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%% Tiem step the model for two days, in order to get an adjusted state
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 model = WVModel(wvt);
 
 model.createNetCDFFileForModelOutput(filename,outputInterval=3600,shouldOverwriteExisting=true);

@@ -8,8 +8,13 @@ basedir = "/Users/jearly/Dropbox/FineScaleData/";
 basedir = "";
 % wvd = WVDiagnostics(basedir + "fine-scale-hydrostatic-50km-128-222-anticyclone-cyclogeostrophic.nc");
 % wvd = WVDiagnostics("/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-128-222-cyclone-cyclogeostrophic.nc");
-wvd = WVDiagnostics("/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-128-222-anticyclone-cyclogeostrophic.nc");
+% wvd = WVDiagnostics("/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-128-222-anticyclone-cyclogeostrophic.nc");
+wvd = WVDiagnostics("/Volumes/seattle_data1/jearly/FineScaleData/fine-scale-boussinesq-50km-128-222-no-eddy.nc");
 wvt = wvd.wvt;
+
+shouldShowEddyContours = false;
+fluxArrowScale = 1.0; % I used 2 for the eddy+IO cases, and 0.5 for the IGW case.
+fluxSmoothing = 5;
 
 figureFolder = "./figures-spectral-movie";
 if ~exist(figureFolder, 'dir')
@@ -32,10 +37,6 @@ int_vol = @(integrand) sum(mean(mean(shiftdim(wvt.z_int,-2).*integrand,1),2),3);
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-indices_phase{1} = 1:4;
-indices_phase{2} = 5:8;
-indices_phase{3} = 4*(0:3) + 1;
-
 fig = figure('Units', 'points', 'Position', [50 50 600 600]);
 set(gcf,'PaperPositionMode','auto')
 set(gcf, 'Color', 'w');
@@ -47,7 +48,9 @@ wvd.iTime = 1;
 t0 = wvt.t;
 
 for iTime= 1:length(t)
-    analysisIndices = iTime; %indices_phase{iPhase};
+    analysisIndices = (iTime-fluxSmoothing):(iTime + fluxSmoothing); %indices_phase{iPhase};
+    analysisIndices(analysisIndices<1) = [];
+    analysisIndices(analysisIndices>length(t)) = [];
     wvd.iTime = iTime;
 
     clf
@@ -62,8 +65,10 @@ for iTime= 1:length(t)
 
     p3 = pcolor(horzAxis,vertAxis,squeeze(1e4*wave_energy(xIndices,yIndices,zIndices)).'); shading interp, hold on
     
-    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
-    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+    if shouldShowEddyContours
+        contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
+        contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+    end
     ylim([-750 0])
     clim([0 100])
     colormap(axTile,WVDiagnostics.cmocean('tempo'))
@@ -89,8 +94,10 @@ for iTime= 1:length(t)
 
     axTile = nexttile(tl,2);
     pcolor(wvt.x/1e3,wvt.z,log10(abs(squeeze(te_diss(xIndices,yIndices,zIndices)))).'), shading flat, hold on
-    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
-    contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+    if shouldShowEddyContours
+        contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[-0.01 -0.01],'k',linewidth=1.5)
+        contour(horzAxis,vertAxis,squeeze(rv(xIndices,yIndices,zIndices)).'/wvt.f,[0.01 0.01],'k',linewidth=1.5)
+    end
     cb_diss = colorbar("south");
     cb_diss.Label.String = "log_{10} [m^2 s^{-3}]";
     cb_diss.Label.Position = [-8.5 2.2750 0]; % positive above -8.5
@@ -103,10 +110,10 @@ for iTime= 1:length(t)
      axTile.XTick = [];
      axTile.YTick = [];
 
-    t = wvt.t - t0;
-    days = floor(t/86400) ;
-    hours = floor((t-86400*floor(t/86400))/3600);
-    title(tl, "anticyclone " + days + " days " + hours + " hours")
+    tExp = wvt.t - t0;
+    days = floor(tExp/86400) ;
+    hours = floor((tExp-86400*floor(tExp/86400))/3600);
+    title(tl, "IGW field " + days + " days " + hours + " hours")
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Fluxes
@@ -141,11 +148,11 @@ for iTime= 1:length(t)
     end
     
     axTile = nexttile(tl,3);
-    wvd.plotPoissonFlowOverContours(figureHandle=axTile,vectorDensityLinearTransitionWavenumber=10^(-3.9),quiverScale=2,inertialFlux=wwg,addFrequencyContours=true);
+    wvd.plotPoissonFlowOverContours(figureHandle=axTile,vectorDensityLinearTransitionWavenumber=10^(-3.9),quiverScale=fluxArrowScale,inertialFlux=wwg,addFrequencyContours=true);
     title("wwg")
 
     axTile = nexttile(tl,4);
-    wvd.plotPoissonFlowOverContours(figureHandle=axTile,vectorDensityLinearTransitionWavenumber=10^(-3.9),quiverScale=2,inertialFlux=www,addFrequencyContours=true);
+    wvd.plotPoissonFlowOverContours(figureHandle=axTile,vectorDensityLinearTransitionWavenumber=10^(-3.9),quiverScale=fluxArrowScale,inertialFlux=www,addFrequencyContours=true);
     title("www")
     axTile.YTick = [];
     axTile.YLabel.String = '';

@@ -16,8 +16,8 @@ elseif eddysign == 0
     shouldAddEddy = false;
 end
 
-% transform = 'hydrostatic';
-transform = 'boussinesq';
+transform = 'hydrostatic';
+% transform = 'boussinesq';
 
 if resolution == 64
     restartFile = "fine-scale-" + transform + "-50km-64-111-one-half-dealias.nc";
