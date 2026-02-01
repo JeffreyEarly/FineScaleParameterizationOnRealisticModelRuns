@@ -12,11 +12,11 @@ N2 = @(z) N0*N0*exp(2*z/L_gm);
 Lz = 4000;
 
 L = 50e3;
-Nxy = 256;
+Nxy = 128;
 latitude = 31;
 
-transform = 'hydrostatic';
-% transform = 'boussinesq';
+% transform = 'hydrostatic';
+transform = 'boussinesq';
 
 Nz = WVStratification.verticalResolutionForHorizontalResolution(L,Lz,Nxy,N2=N2,latitude=latitude);
 

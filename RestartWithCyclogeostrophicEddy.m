@@ -1,28 +1,38 @@
 
-resolution = 256;
-eddysign = -1;
+resolution = 128;
+eddysign = 0;
 
 if eddysign == 1
     eddyname = "cyclone";
+    filenameSuffix = "-cyclogeostrophic.nc";
+    shouldAddEddy = true;
 elseif eddysign == -1
     eddyname = "anticyclone";
+    filenameSuffix = "-cyclogeostrophic.nc";
+    shouldAddEddy = true;
+elseif eddysign == 0
+    eddyname = "no-eddy";
+    filenameSuffix = ".nc";
+    shouldAddEddy = false;
 end
+
+% transform = 'hydrostatic';
+transform = 'boussinesq';
 
 if resolution == 64
-    restartFile = "fine-scale-hydrostatic-50km-64-111-one-half-dealias.nc";
-    filenamePrefix = "fine-scale-hydrostatic-50km-64-111-";
+    restartFile = "fine-scale-" + transform + "-50km-64-111-one-half-dealias.nc";
+    filenamePrefix = "fine-scale-" + transform + "-50km-64-111-";
 elseif resolution == 128
-    restartFile = "fine-scale-hydrostatic-50km-128-222-one-half-dealias.nc";
-    filenamePrefix = "fine-scale-hydrostatic-50km-128-222-";
+    restartFile = "fine-scale-" + transform + "-50km-128-222-one-half-dealias.nc";
+    filenamePrefix = "fine-scale-" + transform + "-50km-128-222-";
 elseif resolution == 256
-    restartFile = "fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
-    filenamePrefix = "fine-scale-hydrostatic-50km-256-443-";
+    restartFile = "fine-scale-" + transform + "-50km-256-443-one-half-dealias.nc";
+    filenamePrefix = "fine-scale-" + transform + "-50km-256-443-";
 end
 
-filename = filenamePrefix + eddyname + "-cyclogeostrophic.nc";
+filename = filenamePrefix + eddyname + filenameSuffix;
 
 shouldAddInertialOscillations = true;
-shouldAddEddy = true;
 
 wvt = WVTransform.waveVortexTransformFromFile(restartFile,iTime=Inf);
 wvt.removeAll;
