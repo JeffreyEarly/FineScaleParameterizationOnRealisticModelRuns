@@ -1,6 +1,6 @@
 
-resolution = 64;
-eddysign = 1;
+resolution = 256;
+eddysign = -1;
 
 if eddysign == 1
     eddyname = "cyclone";
@@ -16,7 +16,7 @@ elseif resolution == 128
     filenamePrefix = "fine-scale-hydrostatic-50km-128-222-";
 elseif resolution == 256
     restartFile = "fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc";
-    filenamePrefix = "fine-scale-hydrostatic-50km-128-222-";
+    filenamePrefix = "fine-scale-hydrostatic-50km-256-443-";
 end
 
 filename = filenamePrefix + eddyname + "-cyclogeostrophic.nc";
