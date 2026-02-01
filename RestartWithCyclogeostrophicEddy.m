@@ -34,8 +34,10 @@ filename = filenamePrefix + eddyname + filenameSuffix;
 
 shouldAddInertialOscillations = true;
 
-wvt = WVTransform.waveVortexTransformFromFile(restartFile,iTime=Inf);
-wvt.removeAll;
+wvt = WVTransform.waveVortexTransformFromFile(restartFile,iTime=Inf,shouldReadOnly=true);
+if ~eddysign == 0
+    wvt.removeAll;
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
