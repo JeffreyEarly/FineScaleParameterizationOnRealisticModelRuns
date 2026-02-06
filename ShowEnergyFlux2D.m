@@ -34,7 +34,7 @@ set(gcf, 'Color', 'w');
 tl = tiledlayout(1,2);
 
 for iPhase=3:3
-    analysisIndices = 5; %indices_phase{iPhase};
+    analysisIndices = 40:61; %indices_phase{iPhase};
 
     C = orderedcolors("gem");
     colorDictionary = dictionary("adaptive_damping",{C(2,:)});

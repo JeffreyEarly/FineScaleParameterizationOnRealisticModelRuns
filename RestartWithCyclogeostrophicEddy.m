@@ -1,13 +1,14 @@
 
 resolution = 128;
-eddysign = 0;
+eddysign = -1;
+eddy_amplitude = 0.07;
 
 if eddysign == 1
-    eddyname = "cyclone";
+    eddyname = "cyclone-" + round(eddy_amplitude*100) + "cms";
     filenameSuffix = "-cyclogeostrophic.nc";
     shouldAddEddy = true;
 elseif eddysign == -1
-    eddyname = "anticyclone";
+    eddyname = "anticyclone-" + round(eddy_amplitude*100) + "cms";
     filenameSuffix = "-cyclogeostrophic.nc";
     shouldAddEddy = true;
 elseif eddysign == 0

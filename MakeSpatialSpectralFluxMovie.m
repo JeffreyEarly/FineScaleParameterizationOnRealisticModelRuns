@@ -9,12 +9,13 @@ basedir = "";
 % wvd = WVDiagnostics(basedir + "fine-scale-hydrostatic-50km-128-222-anticyclone-cyclogeostrophic.nc");
 % wvd = WVDiagnostics("/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-128-222-cyclone-cyclogeostrophic.nc");
 % wvd = WVDiagnostics("/Users/jearly/Dropbox/FineScaleData/fine-scale-hydrostatic-50km-128-222-anticyclone-cyclogeostrophic.nc");
-wvd = WVDiagnostics("/Volumes/seattle_data1/jearly/FineScaleData/fine-scale-boussinesq-50km-128-222-no-eddy.nc");
+wvd = WVDiagnostics("/Users/jearly/Documents/ProjectRepositories/FineScaleParameterizationOnRealisticModelRuns/fine-scale-hydrostatic-50km-128-222-anticyclone-7cms-cyclogeostrophic.nc");
 wvt = wvd.wvt;
 
-shouldShowEddyContours = false;
-fluxArrowScale = 1.0; % I used 2 for the eddy+IO cases, and 0.5 for the IGW case.
+shouldShowEddyContours = true;
+fluxArrowScale = 2.0; % I used 2 for the eddy+IO cases, and 0.5 for the IGW case.
 fluxSmoothing = 5;
+simTitle = "Anticyclone"; % "IGW field";
 
 figureFolder = "./figures-spectral-movie";
 if ~exist(figureFolder, 'dir')
@@ -113,7 +114,7 @@ for iTime= 1:length(t)
     tExp = wvt.t - t0;
     days = floor(tExp/86400) ;
     hours = floor((tExp-86400*floor(tExp/86400))/3600);
-    title(tl, "IGW field " + days + " days " + hours + " hours")
+    title(tl, simTitle + " " + days + " days " + hours + " hours")
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Fluxes
