@@ -1,7 +1,9 @@
-
-resolution = 128;
-eddysign = -1;
+%  /Applications/MATLAB_R2025b.app/bin/matlab -nojvm -nodisplay -nosplash
+resolution = 256;
+eddysign = 0;
 eddy_amplitude = 0.07;
+% transform = 'hydrostatic';
+transform = 'boussinesq';
 
 if eddysign == 1
     eddyname = "cyclone-" + round(eddy_amplitude*100) + "cms";
@@ -16,9 +18,6 @@ elseif eddysign == 0
     filenameSuffix = ".nc";
     shouldAddEddy = false;
 end
-
-transform = 'hydrostatic';
-% transform = 'boussinesq';
 
 if resolution == 64
     restartFile = "fine-scale-" + transform + "-50km-64-111-one-half-dealias.nc";
@@ -88,5 +87,7 @@ end
 
 % N2 = wvt.N2 + squeeze( (N2(floor(wvt.Nx/2),floor(wvt.Ny/2),:)) );
 model = WVModel(wvt);
-model.createNetCDFFileForModelOutput(filename,outputInterval=6*3600);
-model.integrateToTime(wvt.t + 15*86400);
+model.createNetCDFFileForModelOutput(filename,outputInterval=1800);
+model.integrateToTime(wvt.t + 10*3600);
+% model.createNetCDFFileForModelOutput(filename,outputInterval=6*3600);
+% model.integrateToTime(wvt.t + 15*86400);
