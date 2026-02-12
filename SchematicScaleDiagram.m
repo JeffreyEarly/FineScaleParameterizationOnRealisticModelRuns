@@ -140,6 +140,8 @@ domainFrac = 1/3;
 xInd = (floor(wvt.Nx/2)-floor(wvt.Nx*domainFrac/2)):(floor(wvt.Nx/2)+floor(wvt.Nx*domainFrac/2));
 yInd = xInd;
 zInd = 1:wvt.Nz;
+zIndHist = 1:wvt.Nz;
+% zIndHist = find(wvt.z>-1000);
 
 tile = nexttile(tl,1,[2,1]);
 hold on
@@ -151,6 +153,7 @@ plot(LCoriolisProfile,wvt.z,'Color',colorDictionary{'Lzf'},'linewidth',2,'Displa
 plot(LhCoriolisProfile,wvt.z,'Color',colorDictionary{'Lhf'},'linewidth',2,'DisplayName','Lh_{f}')
 % add grid spacing
 plot(diff(wvt.z),wvt.z(1:end-1),'k--')
+xline(wvt.Lx/wvt.Nx,'k:')
 % fine tune plot
 xlog
 set(gca, 'XMinorTick', 'on')
@@ -160,44 +163,47 @@ ylabel('depth (m)')
 box on
 % legend('Location','best')
 
+LOzmidovHist = LOzmidov(:,:,zIndHist);
+LCoriolisHist = LCoriolis(:,:,zIndHist);
+LhCoriolisHist = LhCoriolis(:,:,zIndHist);
 
 tile = nexttile(tl,2,[2,2]);
 hold on
-histLO = histogram(LOzmidov(:),'FaceColor',colorDictionary{'LO'},'EdgeColor','none','Normalization',normalization,'DisplayName','Ozmidov length');
-histLzf = histogram(LCoriolis(:),'FaceColor',colorDictionary{'Lzf'},'EdgeColor','none','Normalization',normalization,'DisplayName','Vertical Coriolis length');
-histLhf = histogram(LhCoriolis(:),'FaceColor',colorDictionary{'Lhf'},'EdgeColor','none','Normalization',normalization,'DisplayName','Horizontal Coriolis length');
+histLO = histogram(LOzmidovHist(:),'FaceColor',colorDictionary{'LO'},'EdgeColor','none','Normalization',normalization,'DisplayName','Ozmidov length');
+histLzf = histogram(LCoriolisHist(:),'FaceColor',colorDictionary{'Lzf'},'EdgeColor','none','Normalization',normalization,'DisplayName','Vertical Coriolis length');
+histLhf = histogram(LhCoriolisHist(:),'FaceColor',colorDictionary{'Lhf'},'EdgeColor','none','Normalization',normalization,'DisplayName','Horizontal Coriolis length');
 xlog
 xlim([0,1000])
 xlabel('length scale (m)')
 ylabel(normalization)
 % yticklabels([])
 box on
-legend('Location','northeast')
+legend('Location','best')
 % label peaks
 % LO
 % [maxCount, maxIdx] = max(histLO.Values);
 % plot(histLO.BinEdges(maxIdx),maxCount,'k.','HandleVisibility','off')
 % text(histLO.BinEdges(maxIdx),maxCount+3e-4,sprintf('%0.1f m',histLO.BinEdges(maxIdx)))
-[~,idx] = min(abs(histLO.BinEdges-peakOp(LOzmidov(:))));
-plot(peakOp(LOzmidov(:)),histLO.Values(idx),'k.','DisplayName',peakOpName)
-text(peakOp(LOzmidov(:)),histLO.Values(idx),sprintf('%0.0f m',peakOp(LOzmidov(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
+[~,idx] = min(abs(histLO.BinEdges-peakOp(LOzmidovHist(:))));
+plot(peakOp(LOzmidovHist(:)),histLO.Values(idx),'k.','DisplayName',peakOpName)
+text(peakOp(LOzmidovHist(:)),histLO.Values(idx),sprintf('%0.0f m',peakOp(LOzmidovHist(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
 % Lzf
 % [maxCount, maxIdx] = max(histLzf.Values);
 % plot(histLzf.BinEdges(maxIdx),maxCount,'k.','HandleVisibility','off')
 % text(histLzf.BinEdges(maxIdx),maxCount+3e-4,sprintf('%0.1f m',histLzf.BinEdges(maxIdx)))
-[~,idx] = min(abs(histLzf.BinEdges-peakOp(LCoriolis(:))));
-plot(peakOp(LCoriolis(:)),histLzf.Values(idx),'k.','HandleVisibility','off')
-text(peakOp(LCoriolis(:)),histLzf.Values(idx),sprintf('%0.0f m',peakOp(LCoriolis(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
+[~,idx] = min(abs(histLzf.BinEdges-peakOp(LCoriolisHist(:))));
+plot(peakOp(LCoriolisHist(:)),histLzf.Values(idx),'k.','HandleVisibility','off')
+text(peakOp(LCoriolisHist(:)),histLzf.Values(idx),sprintf('%0.0f m',peakOp(LCoriolisHist(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
 % Lhf
 % [maxCount, maxIdx] = max(histLhf.Values);
 % plot(histLhf.BinEdges(maxIdx),maxCount,'k.','HandleVisibility','off')
 % text(histLhf.BinEdges(maxIdx),maxCount+3e-4,sprintf('%0.1f m',histLhf.BinEdges(maxIdx)))
-[~,idx] = min(abs(histLhf.BinEdges-peakOp(LhCoriolis(:))));
-plot(peakOp(LhCoriolis(:)),histLhf.Values(idx),'k.','HandleVisibility','off')
-text(peakOp(LhCoriolis(:)),histLhf.Values(idx),sprintf('%0.0f m',peakOp(LhCoriolis(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
+[~,idx] = min(abs(histLhf.BinEdges-peakOp(LhCoriolisHist(:))));
+plot(peakOp(LhCoriolisHist(:)),histLhf.Values(idx),'k.','HandleVisibility','off')
+text(peakOp(LhCoriolisHist(:)),histLhf.Values(idx),sprintf('%0.0f m',peakOp(LhCoriolisHist(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
 
 % model grid spacing
-xline(min(diff(wvt.z)),'k--','DisplayName','min. \Deltaz')
+xline(min(diff(wvt.z)),'k--','DisplayName','\Deltaz')
 xline(wvt.Lx/wvt.Nx,'k:','DisplayName','\Deltax')
 
 % title
