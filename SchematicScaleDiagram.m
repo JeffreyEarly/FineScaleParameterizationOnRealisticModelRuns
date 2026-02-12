@@ -177,21 +177,21 @@ legend('Location','best')
 % text(histLO.BinEdges(maxIdx),maxCount+3e-4,sprintf('%0.1f m',histLO.BinEdges(maxIdx)))
 [~,idx] = min(abs(histLO.BinEdges-peakOp(LOzmidov(:))));
 plot(peakOp(LOzmidov(:)),histLO.Values(idx),'k.','DisplayName',peakOpName)
-text(peakOp(LOzmidov(:)),histLO.Values(idx)+3e-4,sprintf('%0.0f m',peakOp(LOzmidov(:))))
+text(peakOp(LOzmidov(:)),histLO.Values(idx),sprintf('%0.0f m',peakOp(LOzmidov(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
 % Lzf
 % [maxCount, maxIdx] = max(histLzf.Values);
 % plot(histLzf.BinEdges(maxIdx),maxCount,'k.','HandleVisibility','off')
 % text(histLzf.BinEdges(maxIdx),maxCount+3e-4,sprintf('%0.1f m',histLzf.BinEdges(maxIdx)))
 [~,idx] = min(abs(histLzf.BinEdges-peakOp(LCoriolis(:))));
 plot(peakOp(LCoriolis(:)),histLzf.Values(idx),'k.','HandleVisibility','off')
-text(peakOp(LCoriolis(:)),histLzf.Values(idx)+3e-4,sprintf('%0.0f m',peakOp(LCoriolis(:))))
+text(peakOp(LCoriolis(:)),histLzf.Values(idx),sprintf('%0.0f m',peakOp(LCoriolis(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
 % Lhf
 % [maxCount, maxIdx] = max(histLhf.Values);
 % plot(histLhf.BinEdges(maxIdx),maxCount,'k.','HandleVisibility','off')
 % text(histLhf.BinEdges(maxIdx),maxCount+3e-4,sprintf('%0.1f m',histLhf.BinEdges(maxIdx)))
 [~,idx] = min(abs(histLhf.BinEdges-peakOp(LhCoriolis(:))));
 plot(peakOp(LhCoriolis(:)),histLhf.Values(idx),'k.','HandleVisibility','off')
-text(peakOp(LhCoriolis(:)),histLhf.Values(idx)+3e-4,sprintf('%0.0f m',peakOp(LhCoriolis(:))))
+text(peakOp(LhCoriolis(:)),histLhf.Values(idx),sprintf('%0.0f m',peakOp(LhCoriolis(:))),'HorizontalAlignment','left','VerticalAlignment','bottom')
 
 % model grid spacing
 xline(min(diff(wvt.z)),'k--','DisplayName','min. \Deltaz')
