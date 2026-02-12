@@ -16,6 +16,9 @@ basedir = '/Volumes/SanDiskExtremePro/research/JeffreyEarly/FineScaleData/';
 % filename = '25cms/fine-scale-hydrostatic-50km-256-443-anticyclone-cyclogeostrophic.nc';
 % shortname = '25cm/s anticyclone';
 
+% filename = '25cms/fine-scale-hydrostatic-50km-256-443-cyclone-cyclogeostrophic.nc';
+% shortname = '25cm/s cyclone';
+
 filename = 'fine-scale-hydrostatic-50km-256-443-one-half-dealias.nc';
 shortname = 'GM IGW field';
 
@@ -24,7 +27,7 @@ wvd = WVDiagnostics(fullfile(basedir,filename));
 wvt = wvd.wvt;
 
 % create figure directory
-shouldExportFigures = false;
+shouldExportFigures = true;
 figureFolder = "./figures";
 if ~exist(figureFolder, 'dir')
     mkdir(figureFolder)
@@ -133,7 +136,7 @@ normalization = 'probability';
 peakOp = @(x) median(x); peakOpName = 'median value';
 
 % averaging indices
-domainFrac = 1/4;
+domainFrac = 1/3;
 xInd = (floor(wvt.Nx/2)-floor(wvt.Nx*domainFrac/2)):(floor(wvt.Nx/2)+floor(wvt.Nx*domainFrac/2));
 yInd = xInd;
 zInd = 1:wvt.Nz;
@@ -169,7 +172,7 @@ xlabel('length scale (m)')
 ylabel(normalization)
 % yticklabels([])
 box on
-legend('Location','best')
+legend('Location','northeast')
 % label peaks
 % LO
 % [maxCount, maxIdx] = max(histLO.Values);
@@ -202,7 +205,7 @@ title(tl,runname,'Interpreter','latex')
 
 % save
 if shouldExportFigures
-    exportgraphics(fig,fullfile(figureFolder,'TurbulenceScales.png'))
+    exportgraphics(fig,fullfile(figureFolder,sprintf('TurbulenceScales_%s.png',replace(replace(shortname,'cm/s','cmps'),' ','-'))))
 end
 
 
@@ -220,7 +223,7 @@ title(runname,'Interpreter','latex')
 
 % save
 if shouldExportFigures
-    exportgraphics(fig,fullfile(figureFolder,sprintf("EnergyFluxExact_run%d_%d.png",runNumber,resolution)))
+    exportgraphics(fig,fullfile(figureFolder,sprintf('EnergyFluxExact_%s.png',replace(replace(shortname,'cm/s','cmps'),' ','-'))))
 end
 
 
